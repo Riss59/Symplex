@@ -5,13 +5,20 @@ import javax.swing.JTextField;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 
 import javax.swing.JTextPane;
 import javax.swing.text.JTextComponent;
 
 import java.awt.GridBagLayout;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+
 import java.awt.GridBagConstraints;
+
+import javax.swing.ButtonGroup;
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JEditorPane;
 import javax.swing.JSeparator;
@@ -21,7 +28,15 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.text.DecimalFormat;
+import java.util.Arrays;
+
 import javax.swing.JTable;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.JList;
+import javax.swing.JRadioButton;
+import java.awt.Font;
 
 public class MainFrame {
 
@@ -32,7 +47,6 @@ public class MainFrame {
 	private JTextField textField_2;
 	private JLabel label_1;
 	private JLabel label_2;
-	private JLabel label_3;
 	private JLabel label_4;
 	private JTextField textField_3;
 	private JLabel label_5;
@@ -48,12 +62,16 @@ public class MainFrame {
 	private JLabel label_10;
 	private JLabel label_11;
 	private JLabel lblX_2;
-	private JLabel lblNewLabel;
 	private JLabel label_15;
 	private JLabel lblX_1;
 	private JTextField textField_9;
 	private JTextField textField_10;
 	private JTable table;
+	private JTable table_1;
+	private JTable table_2;
+	private JTable table_3;
+	private int krok;
+	private JLabel lblNewLabel_1;
 
 	/**
 	 * Launch the application.
@@ -75,20 +93,17 @@ public class MainFrame {
 	 * Create the application.
 	 */
 	public MainFrame() {
-		initialize();
-	}
-
-	/**
-	 * Initialize the contents of the frame.
-	 */
-	private void initialize() {
+		
+		Sympleks symplex = new Sympleks(2,5);
 		frame = new JFrame();
+		frame.getContentPane().setFont(new Font("Calibri", Font.PLAIN, 11));
+		frame.getContentPane().setForeground(Color.WHITE);
 		frame.setBounds(100, 100, 562, 311);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
 		
 		JLabel lblPodajFunkcjCelu = new JLabel("Podaj funkcj celu:");
-		lblPodajFunkcjCelu.setBounds(10, 11, 91, 14);
+		lblPodajFunkcjCelu.setBounds(10, 11, 156, 14);
 		frame.getContentPane().add(lblPodajFunkcjCelu);
 		
 		textField = new JTextField();
@@ -121,13 +136,9 @@ public class MainFrame {
 		label_1.setBounds(150, 39, 16, 14);
 		frame.getContentPane().add(label_1);
 		
-		label_2 = new JLabel("->");
+		label_2 = new JLabel("- >");
 		label_2.setBounds(176, 39, 16, 14);
 		frame.getContentPane().add(label_2);
-		
-		label_3 = new JLabel("max");
-		label_3.setBounds(202, 39, 31, 14);
-		frame.getContentPane().add(label_3);
 		
 		label_4 = new JLabel("Rownania:");
 		label_4.setBounds(10, 67, 91, 14);
@@ -201,6 +212,43 @@ public class MainFrame {
 		lblX_2.setBounds(10, 182, 137, 14);
 		frame.getContentPane().add(lblX_2);
 		
+
+		JLabel lblNewLabel = new JLabel("");
+		lblNewLabel.setBounds(267, 146, 225, 14);
+		frame.getContentPane().add(lblNewLabel);
+		
+		lblNewLabel_1 = new JLabel("");
+		lblNewLabel_1.setBounds(267, 171, 162, 14);
+		frame.getContentPane().add(lblNewLabel_1);
+		
+		JRadioButton rdbtnMin = new JRadioButton(" min");
+		rdbtnMin.setBounds(172, 22, 61, 14);
+		frame.getContentPane().add(rdbtnMin);
+		
+		JRadioButton rdbtnMax = new JRadioButton("max");
+		rdbtnMax.setBounds(173, 60, 60, 14);
+		frame.getContentPane().add(rdbtnMax);
+		
+		rdbtnMax.setSelected(true);
+		
+		ButtonGroup group = new ButtonGroup();
+		group.add(rdbtnMin);
+		group.add(rdbtnMax);
+		
+		//headers for the table
+        String[] columns = new String[] {
+            "X1", "X2", "X3", "U1","U2","h"
+        };
+         
+        //actual data for the table in a 2d array
+        Object[][] data = new Object[][] {
+            {0, 0, 0, 0, 0,0 },
+            {0, 0, 0, 0, 0,0 },
+            {0, 0, 0, 0, 0,0 },
+        };
+		DefaultTableModel model = new DefaultTableModel(data, columns);
+		DecimalFormat decimalFormat = new DecimalFormat("#.#");
+		
 		JButton btnNewButton = new JButton("Zaladuj dane");
 		btnNewButton.addMouseListener(new MouseAdapter() {
 			@Override
@@ -222,7 +270,7 @@ public class MainFrame {
 		btnNewButton.setBounds(5, 225, 106, 23);
 		frame.getContentPane().add(btnNewButton);
 		
-		JButton button = new JButton("Wyczysc dane");
+		JButton button = new JButton("Wyczysc");
 		button.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
@@ -233,32 +281,104 @@ public class MainFrame {
 			            specificObject.setText("");
 			        }
 			    }
+			    setKrok(0);
+			    lblNewLabel.setText("");
+			    lblNewLabel_1.setText("");
 			}
 		});
 		button.setBounds(123, 225, 110, 23);
 		frame.getContentPane().add(button);
 		
+        //create table with data	
+		table_3 = new JTable(model);
+		table_3.setForeground(Color.BLACK);
+		table_3.setBackground(Color.WHITE);
+		table_3.setBounds(316, 69, 185, 110);
+		JScrollPane scrollPane = new JScrollPane(table_3);
+		scrollPane.setSize(293, 72);
+		scrollPane.setLocation(243, 33);
+		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		frame.getContentPane().add(scrollPane);
+		
+		
+		
+		
 		JButton button_1 = new JButton("Rozwiaz");
+		
+		float[][] dataWprowadzone=new float[3][6];
+		
 		button_1.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				String [] ArrayName = {"X0","X0","X0","X0","X0"};
-				System.out.println(ArrayName[1]);
+				
+				int wynik=0;
+				test(dataWprowadzone,rdbtnMax.isSelected());
+				symplex.wypelnijTabele(dataWprowadzone);
+				
+				
+				boolean quit=false;
+				
+				while(!quit){
+		        	wynik = symplex.oblicz();
+
+		            if(wynik == 1){
+		                quit = true;
+		            }
+		            else if(wynik == 2){
+		                quit = true;
+		            }
+		        }
+		        for(int i=0;i<=2;i+=1) {
+		        	for(int j=0;j<=5;j+=1) {
+		        		model.setValueAt(decimalFormat.format(symplex.getTable()[i][j]), i, j);
+		        	}
+		        }
+		        setKrok(0);
+		        
+		        if(wynik==1){
+		        float[] wartosci=new float[3];
+		        for(int i=0;i<=2;i+=1) {
+		        	if(i==symplex.getWspolczynniki()[0]) {
+		        		wartosci[i]=symplex.getTable()[0][5];
+		        	}
+		        	else if(i==symplex.getWspolczynniki()[1]) {
+		        		wartosci[i]=symplex.getTable()[1][5];
+		        	}
+		        	else {
+		        		wartosci[i]=0;
+		        	}
+		        }
+		        lblNewLabel.setText(("[X1,X2,X3] ="+Arrays.toString(wartosci)));
+		        lblNewLabel_1.setText("Funkcja celu = "+symplex.getTable()[2][5]);
+		}
 				
 			}
 		});
 		button_1.setBounds(243, 225, 89, 23);
 		frame.getContentPane().add(button_1);
-		
+
+		setKrok(0);
 		JButton button_2 = new JButton("Kolejny krok");
+		button_2.addMouseListener(new MouseAdapter() {
+
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+					if(getKrok()==0) {
+						test(dataWprowadzone,rdbtnMax.isSelected());
+						symplex.wypelnijTabele(dataWprowadzone);
+						setKrok(1);
+					}else {
+					int wynik= symplex.oblicz();
+					}
+			        for(int i=0;i<=2;i+=1) {
+			        	for(int j=0;j<=5;j+=1) {
+			        		model.setValueAt(decimalFormat.format(symplex.getTable()[i][j]), i, j);
+			        	}
+			        }
+		}
+		});
 		button_2.setBounds(345, 225, 108, 23);
 		frame.getContentPane().add(button_2);
-		
-		lblNewLabel = new JLabel("");
-		lblNewLabel.setBackground(Color.white);
-		lblNewLabel.setOpaque(true);
-		lblNewLabel.setBounds(254, 39, 199, 96);
-		frame.getContentPane().add(lblNewLabel);
 		
 		label_15 = new JLabel("<=");
 		label_15.setBounds(170, 95, 16, 14);
@@ -271,17 +391,68 @@ public class MainFrame {
 		textField_9 = new JTextField();
 		textField_9.setText("0");
 		textField_9.setColumns(10);
-		textField_9.setBounds(196, 92, 37, 20);
+		textField_9.setBounds(196, 92, 47, 20);
 		frame.getContentPane().add(textField_9);
 		
 		textField_10 = new JTextField();
 		textField_10.setText("0");
 		textField_10.setColumns(10);
-		textField_10.setBounds(196, 123, 37, 20);
+		textField_10.setBounds(196, 123, 47, 20);
 		frame.getContentPane().add(textField_10);
 		
-		table = new JTable();
-		table.setBounds(348, 181, 77, -38);
-		frame.getContentPane().add(table);
+		DefaultListModel<String> listModel = new DefaultListModel<>();
+		listModel.addElement("USA");
+		listModel.addElement("India");
+		JList<String> countryList = new JList<>(listModel);
+		countryList.setForeground(Color.WHITE);
+		countryList.setBounds(225, 10, -23, 15);
+		frame.getContentPane().add(new JScrollPane(countryList));
+		
+
+		
+
+		
+
+		
+	}
+	
+	public void test(float[][] dataWprowadzone,boolean typ) {
+		dataWprowadzone[0][0]=Float.parseFloat(textField_3.getText());
+		dataWprowadzone[0][1]=Float.parseFloat(textField_4.getText());
+		dataWprowadzone[0][2]=Float.parseFloat(textField_5.getText());
+		dataWprowadzone[0][3]=0;
+		dataWprowadzone[0][4]=0;
+		dataWprowadzone[0][5]=Float.parseFloat(textField_9.getText());
+		
+		dataWprowadzone[1][0]=Float.parseFloat(textField_6.getText());
+		dataWprowadzone[1][1]=Float.parseFloat(textField_7.getText());
+		dataWprowadzone[1][2]=Float.parseFloat(textField_8.getText());
+		dataWprowadzone[1][3]=0;
+		dataWprowadzone[1][4]=0;
+		dataWprowadzone[1][5]=Float.parseFloat(textField_10.getText());
+		
+		if(typ==false) {
+		dataWprowadzone[2][0]=Float.parseFloat(textField.getText());
+		dataWprowadzone[2][1]=Float.parseFloat(textField_1.getText());
+		dataWprowadzone[2][2]=Float.parseFloat(textField_2.getText());			
+		dataWprowadzone[2][3]=0;
+		dataWprowadzone[2][4]=0;
+		dataWprowadzone[2][5]=0;
+		}
+		else {
+			dataWprowadzone[2][0]=-Float.parseFloat(textField.getText());
+			dataWprowadzone[2][1]=-Float.parseFloat(textField_1.getText());
+			dataWprowadzone[2][2]=-Float.parseFloat(textField_2.getText());			
+			dataWprowadzone[2][3]=0;
+			dataWprowadzone[2][4]=0;
+			dataWprowadzone[2][5]=0;	
+		}
+	}
+
+	public void setKrok(int liczba) {
+		this.krok = liczba;
+	}
+	public int getKrok() {
+		return this.krok ;
 	}
 }
